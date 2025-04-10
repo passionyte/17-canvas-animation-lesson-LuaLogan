@@ -14,6 +14,39 @@ import { CANVAS, CTX, MS_PER_FRAME, KEYS } from "./globals.js";
 
 // Globals
 const HERO = new Player(120, 150, 48, 48);
+const numGround = 2
+
+class Grounds {
+  grounds = []
+
+  #newGround() {
+    let ground = new Image()
+    ground.src = "../images/dino_large.png"
+    ground.x_pos = ((2300 / numGround) * this.grounds.length)
+
+    return ground
+  }
+
+  moveToBack(ground) {
+    let furthest 
+
+    for (const g of this.grounds) {
+      if (!furthest || g.x_pos > furthest.x_pos) {
+        furthest = g
+      }
+    }
+
+    ground.x_pos = (furthest.x_pos + (2300 / numGround))
+  }
+
+  constructor() {
+    for (let i = 0; (i < numGround); i++) {
+      this.grounds.push(this.#newGround())
+    }
+  }
+}
+
+const GHANDLER = new Grounds()
 
 let frame_time = performance.now()
 
@@ -56,6 +89,18 @@ function update() {
   // Clear the canvas
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
   
+  // Draw the ground
+
+  // drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+  for (const ground of GHANDLER.grounds) {
+    CTX.drawImage(ground, 0, 102, (2300 / numGround), 26, ground.x_pos, 300, (2300 / numGround), 28)
+    if (ground.x_pos < -(2300 / numGround)) {
+      GHANDLER.moveToBack(ground)
+    }  
+    else {
+      ground.x_pos -= 10
+    }
+  }
   // Draw our hero
   HERO.update();
 }

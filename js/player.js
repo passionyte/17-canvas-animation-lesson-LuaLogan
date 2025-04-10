@@ -29,17 +29,21 @@ export default class Player {
   get bottom() { return (this.position.y + this.height) }
   get left() { return this.position.x }
   get top() { return this.position.y }
+  set right(location) { (this.position.x = (location - this.width)) }
+  set bottom(location) { (this.position.y = (location - this.height)) }
+  set left(location) { this.position.x = location }
+  set top(location) { this.position.y = location }
 
   /**
    * Main function to update location, velocity, and image
    */
   update() {
-    this.velocity.y += GRAVITY // Add gravity to the hero
+    if (this.bottom < FLOOR) this.velocity.y += GRAVITY // Add gravity to the hero
 
     // If we hit the floor, stop falling
     if (this.bottom > FLOOR) {
       this.velocity.y = 0
-      this.position.y = (FLOOR - this.height + 1)
+      this.bottom = FLOOR
     }
 
     this.position.x += this.velocity.x // Update the location to the hero
@@ -55,8 +59,13 @@ export default class Player {
     CTX.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 
+  /**
+   * Make the player jump
+   */
   jump() {
-    this.position.y -= 2
-    this.velocity.y = -10
+    if (this.bottom >= FLOOR) {
+      this.bottom = FLOOR
+      this.velocity.y = -22
+    }
   }
 }
