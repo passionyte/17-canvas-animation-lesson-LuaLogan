@@ -14,6 +14,10 @@ export default class Player {
   constructor(x, y, width, height) {
     this.width = width;
     this.height = height;
+    this.img = new Image()
+    this.steptime = 200
+    this.step = performance.now()
+    this.img.src = "../images/dino_large.png"
 
     this.position = {
       x: x,
@@ -38,12 +42,13 @@ export default class Player {
    * Main function to update location, velocity, and image
    */
   update() {
-    if (this.bottom < FLOOR) this.velocity.y += GRAVITY // Add gravity to the hero
-
     // If we hit the floor, stop falling
-    if (this.bottom > FLOOR) {
+    if ((this.bottom + this.velocity.y) >= FLOOR) {
       this.velocity.y = 0
       this.bottom = FLOOR
+    }
+    else {
+      this.velocity.y += GRAVITY // Add gravity to the hero
     }
 
     this.position.x += this.velocity.x // Update the location to the hero
@@ -55,8 +60,21 @@ export default class Player {
    * Draw the player on the canvas
    */
   draw() {
-    CTX.fillStyle = "yellow";
-    CTX.fillRect(this.position.x, this.position.y, this.width, this.height);
+    if (this.bottom >= FLOOR) {
+      const delta = (performance.now() - this.step)
+
+      if (delta < (this.steptime / 2)) {
+        CTX.drawImage(this.img, 1854, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+      } 
+      else {
+        if (delta > this.steptime) this.step = performance.now()
+        
+        CTX.drawImage(this.img, 1942, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+      }
+    }
+    else {
+      CTX.drawImage(this.img, 1678, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+    }
   }
 
   /**
