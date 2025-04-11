@@ -42,5 +42,24 @@ export const KEYS = {
  */
 export function $(id) { return document.getElementById(id); }
 
+export function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min;}
+
+export function adtLen(adt) { 
+  let len = 0
+   
+  for (let _ in adt) {
+    len++
+  } 
+
+  return len
+}
+
+export function newImg(src) { 
+  const img = new Image()
+  img.src = src || "../images/dino_large.png"
+
+  return img
+}
+
 // Export all the constants by default
 export default { CANVAS, CTX, FPS, MS_PER_FRAME, GRAVITY, FLOOR, KEYS, $ }

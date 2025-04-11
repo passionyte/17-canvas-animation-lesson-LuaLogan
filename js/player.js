@@ -9,6 +9,7 @@
  */
 
 import { CTX, CANVAS, GRAVITY, FLOOR } from "./globals.js"
+import { CactiStore } from "./cactus.js"
 
 export default class Player {
   constructor(x, y, width, height) {
@@ -16,6 +17,7 @@ export default class Player {
     this.height = height;
     this.img = new Image()
     this.steptime = 200
+    this.dead = false
     this.step = performance.now()
     this.img.src = "../images/dino_large.png"
 
@@ -42,17 +44,26 @@ export default class Player {
    * Main function to update location, velocity, and image
    */
   update() {
-    // If we hit the floor, stop falling
-    if ((this.bottom + this.velocity.y) >= FLOOR) {
-      this.velocity.y = 0
-      this.bottom = FLOOR
-    }
-    else {
-      this.velocity.y += GRAVITY // Add gravity to the hero
+    if (!this.dead) {
+      // If we hit the floor, stop falling
+      if ((this.bottom + this.velocity.y) >= FLOOR) {
+        this.velocity.y = 0
+        this.bottom = FLOOR
+
+        for (const c of CactiStore) {
+          if (this.left > c.left && (this.left < c.right)) {
+            this.dead = true
+          }
+        }  
+      }
+      else {
+        this.velocity.y += GRAVITY // Add gravity to the hero
+      }
+
+      this.position.x += this.velocity.x // Update the location to the hero
+      this.position.y += this.velocity.y
     }
 
-    this.position.x += this.velocity.x // Update the location to the hero
-    this.position.y += this.velocity.y
     this.draw();
   }
 
@@ -60,20 +71,25 @@ export default class Player {
    * Draw the player on the canvas
    */
   draw() {
-    if (this.bottom >= FLOOR) {
-      const delta = (performance.now() - this.step)
-
-      if (delta < (this.steptime / 2)) {
-        CTX.drawImage(this.img, 1854, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
-      } 
-      else {
-        if (delta > this.steptime) this.step = performance.now()
-        
-        CTX.drawImage(this.img, 1942, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
-      }
+    if (this.dead) {
+      CTX.drawImage(this.img, 2030, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
     }
     else {
-      CTX.drawImage(this.img, 1678, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+      if (this.bottom >= FLOOR) { // On floor. We need to animate steps.
+        const delta = (performance.now() - this.step)
+  
+        if (delta < (this.steptime / 2)) {
+          CTX.drawImage(this.img, 1854, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+        } 
+        else {
+          if (delta > this.steptime) this.step = performance.now()
+          
+          CTX.drawImage(this.img, 1942, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+        }
+      }
+      else {  
+        CTX.drawImage(this.img, 1678, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
+      }
     }
   }
 
@@ -81,6 +97,8 @@ export default class Player {
    * Make the player jump
    */
   jump() {
+    if (this.dead) return
+
     if (this.bottom >= FLOOR) {
       this.bottom = FLOOR
       this.velocity.y = -22

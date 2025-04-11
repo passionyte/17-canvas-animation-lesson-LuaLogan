@@ -10,17 +10,24 @@
 'use strict';
 
 import Player from "./player.js";
-import Cactus from "./cactus.js";
+import Cactus, { cacti, CactiStore } from "./cactus.js";
 import Grounds from "./grounds.js";
-import { CANVAS, CTX, MS_PER_FRAME, KEYS, FLOOR } from "./globals.js";
+import { CANVAS, CTX, MS_PER_FRAME, KEYS, FLOOR, randInt, adtLen, newImg } from "./globals.js";
 
 // Globals
+let score = 0
+let best = 0
+
 const HERO = new Player(120, 150, 48, 48);
-const Cacti = []
+export const Cacti = []
 
 const GHANDLER = new Grounds()
 
+const gOver = newImg()
+
 let frame_time = performance.now()
+let lastcacti = frame_time
+let lastscore = frame_time
 
 // Event Listeners
 document.addEventListener("keydown", keypress);
@@ -39,7 +46,6 @@ function keypress(event) {
     HERO.jump()
   }
 }
-
 
 /**
  * The main game loop
@@ -60,29 +66,81 @@ function update() {
   
   // Clear the canvas
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+  // Increment score
+
+  if (!HERO.dead) {
+    if (NOW - lastscore >= 100) {
+      score++
+      lastscore = NOW
+
+      GHANDLER.speed += 0.01
+    }
+  }
+  else {
+    if (score > best) {
+      best = score
+
+      GHANDLER.speed = 10
+    }
+  }
+
+  CTX.font = "50px Arial"
+  CTX.fillStyle = "white"
+  CTX.fillText(score, 100, 50, 50)
+
+  CTX.font = "50px Arial"
+  CTX.fillStyle = "white"
+  CTX.fillText(best, 200, 50, 50)
   
   // Draw the ground
 
   // drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
   for (const ground of GHANDLER.grounds) {
-    CTX.drawImage(ground, ground.offset, 102, (2300 / GHANDLER.numGround), 26, ground.x_pos, 300, (2300 / GHANDLER.numGround), 28)
-    if (ground.x_pos < -(2300 / GHANDLER.numGround)) {
+    const w = (2300 / GHANDLER.numGround) // Width of this segment as by numGround
+
+    CTX.drawImage(ground, ground.offset, 102, w, 26, ground.x_pos, 300, w, 28)
+    if (ground.x_pos < -w) {
       GHANDLER.moveToBack(ground)
       if (Math.random() < 0.5) {
-        ground.offset = Math.random() * (2300 / GHANDLER.numGround)
+        ground.offset = randInt(1, w) 
       }
     }  
-    else {
-      ground.x_pos -= 5
+    else if (!HERO.dead) {
+      ground.x_pos -= GHANDLER.speed
     }
   }
 
   // Draw any cacti?
 
-  if (Math.random() < 0.2) Cacti.push(new Cactus(GHANDLER.Back, FLOOR, ))
+  console.log(`ground time ${(1000 + (1000 / (GHANDLER.speed / 10)))}`)
+  if (!HERO.dead && (Math.random() < 0.01 && ((NOW - lastcacti) > (1000 + (1000 / (GHANDLER.speed / 10)))))) {
+      const type = randInt(1, adtLen(cacti))
+      const cactus = new Cactus(2300, (FLOOR - cacti[type].sh), type)
+
+      CactiStore.push(cactus)
+      lastcacti = NOW
+  }
+
+  for (const c of CactiStore) {
+    if (c.position.x > -100) {
+      c.draw()
+      CTX.fillStyle = "aqua"
+      CTX.fillRect(c.left, 100, 10, 10)
+      CTX.fillRect(c.right, 100, 10, 10)
+      if (!HERO.dead) c.position.x -= GHANDLER.speed
+    }
+    else {
+      CactiStore.filter(((el) => (el == c)))
+    }
+  }
 
   // Draw our hero
   HERO.update();
+
+  if (HERO.dead) {
+    CTX.drawImage(gOver, 1294, 29, 381, 21, (CANVAS.width / (1294 / 381)), 100, 381, 21)
+  }
 }
 
 // Start the animation

@@ -1,9 +1,6 @@
 import { CTX, FLOOR } from "./globals.js"
 
-const cacti = {
-    1: {sx: 446, sy: 2, sw: 102, sh: 70},
-
-}
+export const CactiStore = []
 
 export default class Cactus {
     position = {
@@ -18,10 +15,19 @@ export default class Cactus {
         return this.#type
     }
 
+    get left() {
+        return (this.position.x - (this.bounds.sw / 2))
+    }
+
+    get right() {
+        return (this.position.x + (this.bounds.sw))
+    }
+
     draw() {
-        const bounds = cacti[this.type]
+        const bounds = this.bounds || cacti[this.type]
+
+        if (!this.bounds) this.bounds = bounds
         CTX.drawImage(this.img, bounds.sx, bounds.sy, bounds.sw, bounds.sh, this.position.x, this.position.y, bounds.sw, bounds.sh)
-        
     }
 
     constructor(x, y, r) {
@@ -33,4 +39,8 @@ export default class Cactus {
     }
 }
 
-
+export const cacti = {
+    1: {sx: 446, sy: 2, sw: 102, sh: 70},
+    2: {sx: 548, sy: 2, sw: 102, sh: 70},
+    3: {sx: 652, sy: 2, sw: 50, sh: 100}
+}
