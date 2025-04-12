@@ -1,7 +1,5 @@
 import { CTX, FLOOR } from "./globals.js"
 
-export const CactiStore = []
-
 export default class Cactus {
     position = {
         x: 0,
@@ -13,14 +11,6 @@ export default class Cactus {
 
     get type() {
         return this.#type
-    }
-
-    get left() {
-        return (this.position.x - (this.bounds.sw / 2))
-    }
-
-    get right() {
-        return (this.position.x + (this.bounds.sw))
     }
 
     draw() {
@@ -42,5 +32,5 @@ export default class Cactus {
 export const cacti = {
     1: {sx: 446, sy: 2, sw: 102, sh: 70},
     2: {sx: 548, sy: 2, sw: 102, sh: 70},
-    3: {sx: 652, sy: 2, sw: 50, sh: 100}
+    3: {sx: 652, sy: 2, sw: 50, sh: 100},
 }

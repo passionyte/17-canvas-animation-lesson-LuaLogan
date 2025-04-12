@@ -10,16 +10,17 @@
 'use strict';
 
 import Player from "./player.js";
-import Cactus, { cacti, CactiStore } from "./cactus.js";
+import Cactus, { cacti } from "./cactus.js";
 import Grounds from "./grounds.js";
 import { CANVAS, CTX, MS_PER_FRAME, KEYS, FLOOR, randInt, adtLen, newImg } from "./globals.js";
 
 // Globals
 let score = 0
 let best = 0
+let CactiStore = []
+globalThis.CactiStore = CactiStore
 
 const HERO = new Player(120, 150, 48, 48);
-export const Cacti = []
 
 const GHANDLER = new Grounds()
 
@@ -74,7 +75,7 @@ function update() {
       score++
       lastscore = NOW
 
-      GHANDLER.speed += 0.01
+      GHANDLER.speed += 0.03
     }
   }
   else {
@@ -113,8 +114,7 @@ function update() {
 
   // Draw any cacti?
 
-  console.log(`ground time ${(1000 + (1000 / (GHANDLER.speed / 10)))}`)
-  if (!HERO.dead && (Math.random() < 0.01 && ((NOW - lastcacti) > (1000 + (1000 / (GHANDLER.speed / 10)))))) {
+  if (!HERO.dead && (Math.random() < 0.01 && ((NOW - lastcacti) > 1500))) {
       const type = randInt(1, adtLen(cacti))
       const cactus = new Cactus(2300, (FLOOR - cacti[type].sh), type)
 
@@ -125,16 +125,14 @@ function update() {
   for (const c of CactiStore) {
     if (c.position.x > -100) {
       c.draw()
-      CTX.fillStyle = "aqua"
-      CTX.fillRect(c.left, 100, 10, 10)
-      CTX.fillRect(c.right, 100, 10, 10)
       if (!HERO.dead) c.position.x -= GHANDLER.speed
     }
     else {
-      CactiStore.filter(((el) => (el == c)))
+      CactiStore = CactiStore.filter(el => el !== c)
     }
   }
-
+  globalThis.CactiStore = CactiStore
+  
   // Draw our hero
   HERO.update();
 
