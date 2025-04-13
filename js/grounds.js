@@ -1,7 +1,6 @@
 export default class Grounds {
     grounds = []
     numGround = 2
-    speed = 10
   
     #newGround() {
       let ground = new Image()

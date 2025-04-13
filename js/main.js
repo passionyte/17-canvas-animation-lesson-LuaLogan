@@ -10,15 +10,14 @@
 'use strict';
 
 import Player from "./player.js";
-import Cactus, { cacti } from "./cactus.js";
+import Obstacle, { Obstacles } from "./obstacles.js";
 import Grounds from "./grounds.js";
-import { CANVAS, CTX, MS_PER_FRAME, KEYS, FLOOR, randInt, adtLen, newImg } from "./globals.js";
+import { CANVAS, CTX, MS_PER_FRAME, KEYS, randInt, newImg, cloneArray, SPEED } from "./globals.js";
 
 // Globals
-let score = 0
-let best = 0
-let CactiStore = []
-globalThis.CactiStore = CactiStore
+let SCORE = 0
+let BEST = 0
+let SPEEDMOD = 0
 
 const HERO = new Player(120, 150, 48, 48);
 
@@ -27,8 +26,8 @@ const GHANDLER = new Grounds()
 const gOver = newImg()
 
 let frame_time = performance.now()
-let lastcacti = frame_time
-let lastscore = frame_time
+let last_obstacle = frame_time
+let last_score = frame_time
 
 // Event Listeners
 document.addEventListener("keydown", keypress);
@@ -71,28 +70,30 @@ function update() {
   // Increment score
 
   if (!HERO.dead) {
-    if (NOW - lastscore >= 100) {
-      score++
-      lastscore = NOW
+    if (NOW - last_score >= 100) {
+      SCORE++
+      last_score = NOW
 
-      GHANDLER.speed += 0.03
+      if (SPEEDMOD < 2) {
+        SPEEDMOD += 0.01
+      }
     }
   }
   else {
-    if (score > best) {
-      best = score
+    if (SCORE > BEST) {
+      BEST = SCORE
 
-      GHANDLER.speed = 10
+      SPEEDMOD = 0
     }
   }
 
   CTX.font = "50px Arial"
   CTX.fillStyle = "white"
-  CTX.fillText(score, 100, 50, 50)
+  CTX.fillText(SCORE, 100, 50, 50)
 
   CTX.font = "50px Arial"
   CTX.fillStyle = "white"
-  CTX.fillText(best, 200, 50, 50)
+  CTX.fillText(BEST, 200, 50, 50)
   
   // Draw the ground
 
@@ -108,30 +109,55 @@ function update() {
       }
     }  
     else if (!HERO.dead) {
-      ground.x_pos -= GHANDLER.speed
+      ground.x_pos -= (SPEED + SPEEDMOD)
     }
   }
 
-  // Draw any cacti?
+  // Create obstacles
 
-  if (!HERO.dead && (Math.random() < 0.01 && ((NOW - lastcacti) > 1500))) {
-      const type = randInt(1, adtLen(cacti))
-      const cactus = new Cactus(2300, (FLOOR - cacti[type].sh), type)
+  if (!HERO.dead) {
+    if ((NOW - last_obstacle) >= (2000 / (1 + SPEEDMOD))) {
+      let o
+      if (SCORE < 800 || (randInt(1, 6) != 1)) { 
+        // cactus
+        o = new Obstacle("cactus") 
+      }
+      else {
+        // caw caw!
+        // insert bird here
+        console.log("Bird Placeholder")
+      }
 
-      CactiStore.push(cactus)
-      lastcacti = NOW
+      if (o) {
+        Obstacles.push(o)
+      }
+      
+      last_obstacle = NOW
+    }
   }
 
-  for (const c of CactiStore) {
-    if (c.position.x > -100) {
-      c.draw()
-      if (!HERO.dead) c.position.x -= GHANDLER.speed
+  // Draw obstacles and check collisions for death
+
+  let i = 0
+  let curObstacles = cloneArray(Obstacles) // Prevents the flickering
+  for (const o of curObstacles) {
+    if (o.position.x > - 100) {
+      o.draw()
+
+      if (!HERO.dead) { // Only move obstacles and check for death if our pesky hero is still alive
+        o.position.x -= (SPEED + SPEEDMOD)
+        if (HERO.left < o.right && (HERO.left > o.left)) {
+          if (HERO.top > (o.top - 50) && (HERO.top < o.bottom)) {
+            HERO.dead = true
+          }
+        }
+      }
     }
     else {
-      CactiStore = CactiStore.filter(el => el !== c)
+      Obstacles.splice(i, 1)
     }
+    i++
   }
-  globalThis.CactiStore = CactiStore
   
   // Draw our hero
   HERO.update();

@@ -8,7 +8,7 @@
  * Author: 
  */
 
-import { CTX, CANVAS, GRAVITY, FLOOR } from "./globals.js"
+import { CTX, CANVAS, GRAVITY, FLOOR, SPEED } from "./globals.js"
 
 export default class Player {
   constructor(x, y, width, height) {
@@ -55,12 +55,6 @@ export default class Player {
 
       this.position.x += this.velocity.x // Update the location to the hero
       this.position.y += this.velocity.y
-
-      for (const c of globalThis.CactiStore) {
-        if (this.left >= c.left && (this.left <= c.right) && (this.top <= c.top && (this.bottom >= c.bottom))) {
-          this.dead = true
-        }
-      }  
     }
 
     this.draw();

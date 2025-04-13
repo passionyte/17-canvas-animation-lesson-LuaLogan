@@ -35,6 +35,9 @@ export const KEYS = {
   D:68
 };
 
+// Game properties
+export const SPEED = 10
+
 /**
  * Shortcut for the document.getElementById() function
  * @param {String} id The unique identifier of the element being requested.
@@ -54,6 +57,16 @@ export function adtLen(adt) {
   return len
 }
 
+export function cloneArray(a) {
+  const n = []
+
+  for (const i of a) {
+    n.push(i)
+  }
+
+  return n
+}
+
 export function newImg(src) { 
   const img = new Image()
   img.src = src || "../images/dino_large.png"
@@ -62,4 +75,4 @@ export function newImg(src) {
 }
 
 // Export all the constants by default
-export default { CANVAS, CTX, FPS, MS_PER_FRAME, GRAVITY, FLOOR, KEYS, $ }
+export default { CANVAS, CTX, FPS, MS_PER_FRAME, GRAVITY, FLOOR, KEYS, $, randInt, adtLen, cloneArray, SPEED }
