@@ -6,20 +6,18 @@
  * Author:
  * 
  */
-
 'use strict';
-
 import Player from "./player.js";
-import Obstacle, { Obstacles } from "./obstacles.js";
+import _, { Obstacle, Obstacles, obstacleClasses } from "./obstacles.js";
 import Grounds from "./grounds.js";
-import { CANVAS, CTX, MS_PER_FRAME, KEYS, randInt, newImg, cloneArray, SPEED } from "./globals.js";
+import { CANVAS, CTX, MS_PER_FRAME, KEYS, randInt, newImg, cloneArray, SPEED, adtLen } from "./globals.js";
 
 // Globals
 let SCORE = 0
 let BEST = 0
 let SPEEDMOD = 0
 
-const HERO = new Player(120, 150, 48, 48);
+export const HERO = new Player(120, 150, 48, 48);
 
 const GHANDLER = new Grounds()
 
@@ -33,37 +31,36 @@ let last_score = frame_time
 document.addEventListener("keydown", keypress);
 
 // Disable the context menu on the entire document
-document.addEventListener("contextmenu", (event) => { 
+document.addEventListener("contextmenu", (event) => {
   event.preventDefault();
-  return false; 
+  return false;
 });
 
 /**
- * The user pressed a key on the keyboard 
- */
+* The user pressed a key on the keyboard
+*/
 function keypress(event) {
   if ([KEYS.W, KEYS.UP_ARROW, KEYS.SPACE].includes(event.keyCode)) {
     HERO.jump()
   }
+  else if ([KEYS.S, KEYS.DOWN_ARROW].includes(event.keyCode)) {
+    HERO.duck()
+  }
 }
 
 /**
- * The main game loop
- */
+* The main game loop
+*/
 function update() {
   // Prepare for the next frame
   requestAnimationFrame(update)
-  
   /*** Desired FPS Trap ***/
   const NOW = performance.now()
   const TIME_PASSED = NOW - frame_time
-  
   if (TIME_PASSED < MS_PER_FRAME) return
-  
   const EXCESS_TIME = TIME_PASSED % MS_PER_FRAME
   frame_time = NOW - EXCESS_TIME
   /*** END FPS Trap ***/
-  
   // Clear the canvas
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 
@@ -74,8 +71,8 @@ function update() {
       SCORE++
       last_score = NOW
 
-      if (SPEEDMOD < 2) {
-        SPEEDMOD += 0.01
+      if (SCORE > 200 && (SPEEDMOD < 3)) {
+        SPEEDMOD += 0.02
       }
     }
   }
@@ -87,6 +84,8 @@ function update() {
     }
   }
 
+  // Draw score
+
   CTX.font = "50px Arial"
   CTX.fillStyle = "white"
   CTX.fillText(SCORE, 100, 50, 50)
@@ -94,7 +93,6 @@ function update() {
   CTX.font = "50px Arial"
   CTX.fillStyle = "white"
   CTX.fillText(BEST, 200, 50, 50)
-  
   // Draw the ground
 
   // drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
@@ -104,10 +102,10 @@ function update() {
     CTX.drawImage(ground, ground.offset, 102, w, 26, ground.x_pos, 300, w, 28)
     if (ground.x_pos < -w) {
       GHANDLER.moveToBack(ground)
-      if (Math.random() < 0.5) {
-        ground.offset = randInt(1, w) 
+      if (Math.random() < 0.2) {
+        ground.offset = randInt(1, w)
       }
-    }  
+    }
     else if (!HERO.dead) {
       ground.x_pos -= (SPEED + SPEEDMOD)
     }
@@ -116,22 +114,13 @@ function update() {
   // Create obstacles
 
   if (!HERO.dead) {
-    if ((NOW - last_obstacle) >= (2000 / (1 + SPEEDMOD))) {
-      let o
-      if (SCORE < 800 || (randInt(1, 6) != 1)) { 
-        // cactus
-        o = new Obstacle("cactus") 
-      }
-      else {
-        // caw caw!
-        // insert bird here
-        console.log("Bird Placeholder")
-      }
+    if ((NOW - last_obstacle) >= (2500 / (1 + SPEEDMOD))) {
+      const type = ((SCORE < 10 || (randInt(1, 6) != 1)) && "cactus") || "bird"
+      const o = new Obstacle(type, obstacleClasses[type][randInt(1, adtLen(obstacleClasses[type]))], ((type == "bird") && randInt(-30, -150)) || randInt(-6, 6))
 
       if (o) {
         Obstacles.push(o)
       }
-      
       last_obstacle = NOW
     }
   }
@@ -146,11 +135,11 @@ function update() {
 
       if (!HERO.dead) { // Only move obstacles and check for death if our pesky hero is still alive
         o.position.x -= (SPEED + SPEEDMOD)
-        if (HERO.left < o.right && (HERO.left > o.left)) {
-          if (HERO.top > (o.top - 50) && (HERO.top < o.bottom)) {
-            HERO.dead = true
-          }
-        }
+
+        const yoff = ((HERO.ducking) && 34) || 0
+        const col = o.check(HERO.left, HERO.bottom, HERO.size.w, HERO.size.h)
+
+        if (col) HERO.dead = true
       }
     }
     else {
@@ -158,7 +147,6 @@ function update() {
     }
     i++
   }
-  
   // Draw our hero
   HERO.update();
 
@@ -169,3 +157,4 @@ function update() {
 
 // Start the animation
 update()
+export default { HERO }
