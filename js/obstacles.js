@@ -1,5 +1,4 @@
 import { CTX, newImg, FLOOR, DEBUG } from "./globals.js"
-import { HERO } from "./main.js"
 
 export const obstacleClasses = {
     cactus: {
@@ -94,7 +93,7 @@ export class Obstacle extends Hitbox {
     draw() {
         if (DEBUG) super.draw()
 
-        if (!HERO.dead && (this.type == "bird")) {
+        if (this.type == "bird") {
             const NOW = performance.now()
 
             if (!this.last_flap) {

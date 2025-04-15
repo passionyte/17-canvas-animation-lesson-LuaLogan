@@ -13,7 +13,7 @@ import { CTX, GRAVITY, FLOOR } from "./globals.js"
 export default class Player {
   constructor(x, y, width, height) {
     this.img = new Image()
-    this.steptime = 200
+    this.stepTime = 200
     this.dead = false
     this.ducking = false
     this.step = performance.now()
@@ -75,7 +75,7 @@ export default class Player {
 
       if (this.bottom >= FLOOR) { // On floor. We need to animate steps.
         const delta = (performance.now() - this.step)
-        if (delta < (this.steptime / 2)) {
+        if (delta < (this.stepTime / 2)) {
           if (!d) {
             CTX.drawImage(this.img, 1854, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
           }
@@ -84,7 +84,7 @@ export default class Player {
           }
         }
         else {
-          if (delta > this.steptime) this.step = performance.now()
+          if (delta > this.stepTime) this.step = performance.now()
           if (!d) {
             CTX.drawImage(this.img, 1942, 2, 88, 94, this.left, (this.bottom - 85), 88, 94)
           }
@@ -107,7 +107,7 @@ export default class Player {
 
     if (this.bottom >= FLOOR) {
       this.bottom = FLOOR
-      this.velocity.y = -24
+      this.velocity.y = -25
     }
   }
 
@@ -115,10 +115,10 @@ export default class Player {
    * Make the player duck
    */
 
-  duck() {
+  duck(b) {
     if (this.dead) return
     if (this.bottom >= FLOOR) {
-      this.ducking = (!this.ducking)
+      this.ducking = (b)
     }
   }
 }
