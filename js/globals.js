@@ -22,7 +22,7 @@ export const GRAVITY = 1.5;
 export const FLOOR = CANVAS.height - 28;  // Careful - if the height ever changes...
 
 // Some convenient keyboard codes
-export const KEYS = {
+const KEYS = {
  SPACE:32,
  UP_ARROW:38,
  LEFT_ARROW:37,
@@ -34,9 +34,16 @@ export const KEYS = {
  D:68
 };
 
+// What each set of keyboard codes 'does'
+export const keyClasses = {
+  jump: [KEYS.W, KEYS.UP_ARROW, KEYS.SPACE],
+  duck: [KEYS.S, KEYS.DOWN_ARROW]
+}
+
 // Game properties
 export const SPEED = 10
 export const DEBUG = true
+export let FOCUSED = true
 
 /**
 * Shortcut for the document.getElementById() function
@@ -75,4 +82,4 @@ export function newImg(src) {
 }
 
 // Export all the constants by default
-export default { CANVAS, CTX, FPS, MS_PER_FRAME, GRAVITY, FLOOR, KEYS, $, randInt, adtLen, cloneArray, newImg, SPEED }
+export default { CANVAS, CTX, FPS, MS_PER_FRAME, GRAVITY, FLOOR, $, randInt, adtLen, cloneArray, newImg, SPEED }
