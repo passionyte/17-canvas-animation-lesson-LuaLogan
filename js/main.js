@@ -142,7 +142,6 @@ function update() {
     else {
       ground.x_pos -= (SPEED + SPEEDMOD)
     }
-    i++
   }
 
   // Draw decorations
