@@ -3,7 +3,7 @@
  * 
  * 17 - Canvas Animation
  * 
- * Author:
+ * Author: Logan
  * 
  */
 'use strict';
@@ -15,7 +15,7 @@ import { Decorations, Decoration, decorationClasses, maxDecos } from "./deco.js"
 
 // Globals
 let SCORE = 0
-let BEST = 0
+let BEST = localStorage.getItem("dino_hi") || 0
 let SPEEDMOD = 0
 
 const HERO = new Player(120, 150, 88, 94);
@@ -49,7 +49,7 @@ function keypress(event) {
   if (keyClasses.jump.includes(key)) {
     HERO.jump()
   }
-  else if (keyClasses.duck.includes(key)) {
+  else if (keyClasses.duck.includes(key)) { // Start ducking
     HERO.duck(true)
   }
 }
@@ -64,7 +64,7 @@ function keyup(event) {
 
   downKeys[key] = null
 
-  if (keyClasses.duck.includes(key)) {
+  if (keyClasses.duck.includes(key)) { // Stop ducking
     HERO.duck(false)
   }
 }
@@ -74,13 +74,13 @@ for (let c in decorationClasses) {
   for (let i = 0; (i < maxDecos[c]); i++) {
     let b
 
-    if (c == "cloud") { // go figure
+    if (c == "cloud") { // The class *is* the bounds
       b = decorationClasses[c]
     }
-    else if (c == "star") { // state based
-      b = decorationClasses[c].idle
+    else if (c == "star") { // The bounds are state based
+      b = decorationClasses[c][1]
     }
-    else { // random
+    else { // The bounds are random
       b = decorationClasses[c][randInt(1, adtLen(decorationClasses[c]))]
     }
 
@@ -113,19 +113,10 @@ function update() {
     last_score = NOW
 
     if (SCORE > 200 && (SPEEDMOD < 3)) {
-      SPEEDMOD += 0.02
+      SPEEDMOD += (1 / 100) // Speed up the game by a certain factor, if speed is under 3 and score is over 200.
     }
   }
 
-  // Draw score
-
-  CTX.font = "50px Arial"
-  CTX.fillStyle = "white"
-  CTX.fillText(SCORE, 100, 50, 50)
-
-  CTX.font = "50px Arial"
-  CTX.fillStyle = "white"
-  CTX.fillText(BEST, 200, 50, 50)
   // Draw the ground
 
   // drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
@@ -136,7 +127,7 @@ function update() {
     if (ground.x_pos < -w) {
       GHANDLER.moveToBack(ground)
       if (Math.random() < 0.2) {
-        ground.offset = randInt(1, w)
+        ground.offset = randInt(1, w) // Add a random offset to make the ground more interesting
       }
     }
     else {
@@ -147,20 +138,20 @@ function update() {
   // Draw decorations
 
   for (const d of Decorations) {
-    if (d.position.x > -100) {
+    if (d.position.x > -100) { // Actually draw but also move our decorations
       d.draw()
       d.position.x -= d.speed
     }
     else {
-      d.position.x = randInt(1150, 2300)
+      d.position.x = randInt(1150, 2300) // Reset positions to a non-concrete value to make them more random
       d.position.y = randInt(0, 200)
     }
   }
 
   // Create obstacles
 
-  if ((NOW - last_obstacle) >= (2500 / (1 + SPEEDMOD))) {
-    const type = ((SCORE < 600 || (randInt(1, 6) != 1)) && "cactus") || "bird"
+  if ((NOW - last_obstacle) >= (2500 / ((1 + SPEEDMOD) + (randInt(-50, 50) / 100)))) { // Has it been a certain amount of time since?
+    const type = ((SCORE < 400 || (randInt(1, 6) != 1)) && "cactus") || "bird" // Determine the type of obstacle, if player is 'far' then spawn birds a sixth of the time
     const o = new Obstacle(type, obstacleClasses[type][randInt(1, adtLen(obstacleClasses[type]))], ((type == "bird") && randInt(-30, -150)) || randInt(-6, 6))
 
     if (o) {
@@ -180,6 +171,7 @@ function update() {
       // Only move obstacles and check for death if our pesky hero is still alive
       o.position.x -= (SPEED + SPEEDMOD)
 
+      // Collision checking
       const y = ((HERO.ducking) && 50) || 0
       const b = HERO.bottom
       const t = HERO.top
@@ -188,13 +180,16 @@ function update() {
       const w = HERO.size.w
       const h = HERO.size.h
 
+      // Check each corner
       const col = o.check(r, (t + y), w, h) || o.check(l, (b + y), w, h) || o.check(r, (b + y), w, h) || o.check(l, (t + y), w, h)
 
+      // We died, we need to draw game over and set the best.
       if (col) {
         HERO.dead = true
         
         if (SCORE > BEST) {
           BEST = SCORE
+          localStorage.setItem("dino_hi", BEST)
     
           SPEEDMOD = 0
         }
@@ -202,7 +197,7 @@ function update() {
         CTX.drawImage(gOver, 1294, 29, 381, 21, (CANVAS.width / (1294 / 381)), 100, 381, 21)
       }
     }
-    else {
+    else { // Remove obstacle, player has avoided it
       Obstacles.splice(i, 1)
     }
     i++
@@ -210,6 +205,16 @@ function update() {
 
   // Draw our hero
   HERO.update();
+
+  // Draw score
+
+  CTX.font = "50px Courier New"
+  CTX.fillStyle = "white"
+  CTX.fillText(SCORE, 25, 50, 200)
+
+  CTX.font = "50px Courier New"
+  CTX.fillStyle = "white"
+  CTX.fillText(BEST, 200, 50, 200)
 }
 
 function startGame(ev) {
@@ -221,14 +226,15 @@ function startGame(ev) {
 }
 
 function splashScreen() {
-  CTX.font = "50px Arial"
+  CTX.font = "50px Courier New" // Queue somewhat underwhelming splash screen, but hey, gets the job done.
   CTX.fillStyle = "white"
-  CTX.fillText("Press Space to play", ((CANVAS.width / 2) - 200), (CANVAS.height / 2), 400)
+  CTX.fillText("Dinosaur Game", ((CANVAS.width / 2) - 200), ((CANVAS.height / 2) - 50), 400)
+  CTX.fillText("Press Space to play", ((CANVAS.width / 2) - 205), ((CANVAS.height / 2) + 50), 400)
 
   document.addEventListener("keydown", startGame)
 }
 
-// Start the animation
+// If we're in debug, then start the game, otherwise draw the splash screen above.
 
 if (!DEBUG) {
   splashScreen()

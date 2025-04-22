@@ -1,3 +1,12 @@
+/**
+* obstacles.js
+*
+* Handles obstacles such as cacti and birds... or pterodactyls.
+*
+* Author: Logan
+*
+*/
+
 import { CTX, newImg, FLOOR, DEBUG } from "./globals.js"
 
 export const obstacleClasses = {
@@ -43,7 +52,7 @@ export default class Hitbox {
         return this.size.h
     }
 
-    check(x, y) {
+    check(x, y) { // Check collisions by comparing x and y plus w and h
         if ((x >= this.x && (x <= (this.x + this.w)))) {
             if (y >= this.y && (y <= (this.y + this.h))) {
                 return true
@@ -53,7 +62,7 @@ export default class Hitbox {
         return false
     }
 
-    draw() { // Only for DEBUG mode
+    draw() { // Only for DEBUG mode, draws hitbox
         CTX.fillStyle = "aqua"
         CTX.fillRect(this.x, this.y, this.w, this.h)
     }
@@ -91,9 +100,9 @@ export class Obstacle extends Hitbox {
     }
 
     draw() {
-        if (DEBUG) super.draw()
+        if (DEBUG) super.draw() // Draws hitbox if in debug mode (see class Hitbox)
 
-        if (this.type == "bird") {
+        if (this.type == "bird") { // We need to animate the birds flapping
             const NOW = performance.now()
 
             if (!this.last_flap) {
@@ -101,7 +110,7 @@ export class Obstacle extends Hitbox {
             }
             else {
                 const delta = (NOW - this.last_flap)
-                if (delta > 200) {
+                if (delta > 200) { // Need to modify the width and height but also the X and Y so they aren't being messed up
                     const w = (this.ibounds.w - 1)
                     const h = (this.ibounds.h + 19)
                     CTX.drawImage(this.img, (this.ibounds.x - 92), (this.ibounds.y + 11), w, h, this.position.x, this.position.y, w, h)

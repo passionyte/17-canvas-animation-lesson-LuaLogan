@@ -4,7 +4,7 @@
 * Keep all the globals in one place, in case they
 * need to be shared across modules/imports.
 *
-* Author:
+* Author: Logan
 *
 */
 

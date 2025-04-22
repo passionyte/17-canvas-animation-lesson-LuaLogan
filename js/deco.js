@@ -1,13 +1,22 @@
-import { CTX, newImg } from "./globals.js"
+/**
+* deco.js
+*
+* Handles the decorations such as stars, clouds and the moon/sun.
+*
+* Author: Logan
+*
+*/
+
+import { CTX, newImg, adtLen } from "./globals.js"
 
 export const Decorations = []
 
 export const decorationClasses = { // Bounds
     cloud: {x: 166, y: 2, w: 92, h: 27},
     star: {
-        idle: {x: 1274, y: 2, w: 18, h: 18},
-        shine0: {x: 1274, y: 20, w: 18, h: 18},
-        shine1: {x: 1274, y: 38, w: 18, h: 18}
+        1: {x: 1274, y: 2, w: 18, h: 18},
+        2: {x: 1274, y: 20, w: 18, h: 18},
+        3: {x: 1274, y: 38, w: 18, h: 18}
     },
     moon: {
         1: {x: 954, y: 2, w: 40, h: 80},
@@ -26,7 +35,7 @@ export const maxDecos = { // Max decorations able to be displayed on screen
     star: 6
 }
 
-const decoSpeeds = {
+const decoSpeeds = { // Speeds in which the decorations move at
     cloud: 4,
     moon: 1,
     star: 2
@@ -48,6 +57,23 @@ export class Decoration {
     }
 
     draw() {
+        if (this.type == "star") { // We need to make our stars twinkle!
+            const NOW = performance.now()
+            if ((NOW - this.last_twinkle) > 250) {
+                const starClass = decorationClasses.star
+
+                if (this.twinkle == adtLen(starClass)) { // Ensures we don't load a non-existing twinkle state
+                    this.twinkle = 1
+                }
+                else {
+                    this.twinkle++
+                }
+
+                this.last_twinkle = NOW
+                this.bounds = starClass[this.twinkle] // Tada! Got the bounds for this twinkle state
+            }
+        }
+
         CTX.drawImage(this.img, this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h, this.position.x, this.position.y, this.bounds.w, this.bounds.h)
     }
 
@@ -57,7 +83,9 @@ export class Decoration {
         this.bounds = b
         this.position.x = x
         this.position.y = y
-        this.speed = decoSpeeds[this.#type]
+        this.speed = decoSpeeds[type]
+
+        if (type == "star") this.last_twinkle = performance.now(); this.twinkle = 1
     }
 }
 

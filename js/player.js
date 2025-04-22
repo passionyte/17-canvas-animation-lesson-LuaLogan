@@ -5,19 +5,18 @@
 *
 * Acts as a sprite or "hero" for the game
 *
-* Author:
+* Author: Logan
 */
 
-import { CTX, GRAVITY, FLOOR } from "./globals.js"
+import { CTX, GRAVITY, FLOOR, newImg } from "./globals.js"
 
 export default class Player {
   constructor(x, y, width, height) {
-    this.img = new Image()
+    this.img = newImg()
     this.stepTime = 200
     this.dead = false
     this.ducking = false
     this.step = performance.now()
-    this.img.src = "../images/dino_large.png"
 
     this.position = {
       x: x,
