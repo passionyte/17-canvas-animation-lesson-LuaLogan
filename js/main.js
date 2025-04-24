@@ -208,11 +208,12 @@ function update() {
 
   // Draw score
 
-  CTX.font = "50px Courier New"
+  CTX.textAlign = "left"
+  CTX.font = "40px PressStart2P"
   CTX.fillStyle = "white"
-  CTX.fillText(SCORE, 25, 50, 200)
+  CTX.fillText(SCORE, 0, 50, 200)
 
-  CTX.font = "50px Courier New"
+  CTX.font = "40px PressStart2P"
   CTX.fillStyle = "white"
   CTX.fillText(BEST, 200, 50, 200)
 }
@@ -226,10 +227,11 @@ function startGame(ev) {
 }
 
 function splashScreen() {
-  CTX.font = "50px Courier New" // Queue somewhat underwhelming splash screen, but hey, gets the job done.
+  CTX.font = "40px PressStart2P" // Queue somewhat underwhelming splash screen, but hey, gets the job done.
   CTX.fillStyle = "white"
-  CTX.fillText("Dinosaur Game", ((CANVAS.width / 2) - 200), ((CANVAS.height / 2) - 50), 400)
-  CTX.fillText("Press Space to play", ((CANVAS.width / 2) - 205), ((CANVAS.height / 2) + 50), 400)
+  CTX.textAlign = "center"
+  CTX.fillText("Dinosaur Game", (CANVAS.width / 2), ((CANVAS.height / 2) - 50), 400)
+  CTX.fillText("Press Space to play", (CANVAS.width / 2), ((CANVAS.height / 2) + 50), 400)
 
   document.addEventListener("keydown", startGame)
 }

@@ -33,3 +33,8 @@ canvas {
   -webkit-filter: invert(1);
   filter: invert(1);
 }
+
+@font-face {
+  font-family: PressStart2P;
+  src: url("./PressStart2P-Regular.ttf")
+}
